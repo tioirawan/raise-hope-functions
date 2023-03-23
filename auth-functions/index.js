@@ -1,12 +1,17 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const Joi = require("joi");
-const {getAuth} = require("firebase-admin/auth");
+const { getAuth } = require("firebase-admin/auth");
 
-admin.initializeApp();
+// temp only for local testing
+const serviceAccount = require("./serviceAccount.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 exports.helloWorld = functions.https.onRequest((request, response) => {
-  functions.logger.info("Hello logs!", {structuredData: true});
+  functions.logger.info("Hello logs!", { structuredData: true });
   response.send("Hello from Firebase!");
 });
 
@@ -23,7 +28,7 @@ exports.registerVolunteer = functions.https.onCall(async (data, _) => {
       interests: Joi.array().items(Joi.string()).required(),
     });
 
-    const {error, ...validated} = schema.validate(data);
+    const { error, ...validated } = schema.validate(data);
 
     if (error) {
       return {
@@ -31,7 +36,7 @@ exports.registerVolunteer = functions.https.onCall(async (data, _) => {
       };
     }
 
-    const {password, ...volunteer} = validated.value;
+    const { password, ...volunteer } = validated.value;
 
     // // create the user
     const user = await getAuth().createUser({
@@ -41,7 +46,7 @@ exports.registerVolunteer = functions.https.onCall(async (data, _) => {
       // TODO: sanitize phone number to comply with E.164
     });
 
-    functions.logger.info(`user(volunteer) created: ${user.uid}`, {structuredData: true});
+    functions.logger.info(`user(volunteer) created: ${user.uid}`, { structuredData: true });
 
     // // set custom claims on the user
     await admin.auth().setCustomUserClaims(user.uid, {
@@ -86,7 +91,7 @@ exports.registerInstitution = functions.https.onCall(async (data, _) => {
       typeOfHelp: Joi.array().items(Joi.string()).required(),
     });
 
-    const {error, ...validated} = schema.validate(data);
+    const { error, ...validated } = schema.validate(data);
 
     if (error) {
       return {
@@ -94,7 +99,7 @@ exports.registerInstitution = functions.https.onCall(async (data, _) => {
       };
     }
 
-    const {password, ...institution} = validated.value;
+    const { password, ...institution } = validated.value;
 
     // create the user
     const user = await getAuth().createUser({
@@ -104,7 +109,7 @@ exports.registerInstitution = functions.https.onCall(async (data, _) => {
       // TODO: sanitize phone number to comply with E.164
     });
 
-    functions.logger.info(`user(institution) created: ${user.uid}`, {structuredData: true});
+    functions.logger.info(`user(institution) created: ${user.uid}`, { structuredData: true });
 
     // set custom claims on the user
     await admin.auth().setCustomUserClaims(user.uid, {
@@ -147,10 +152,10 @@ exports.userDetails = functions.https.onCall(async (data, context) => {
 
   // get the user details from the database
   const userDetails = await admin
-      .firestore()
-      .collection(role + "s")
-      .doc(context.auth.uid)
-      .get();
+    .firestore()
+    .collection(role + "s")
+    .doc(context.auth.uid)
+    .get();
 
   return {
     ...user,
