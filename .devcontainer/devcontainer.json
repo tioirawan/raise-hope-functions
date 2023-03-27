@@ -8,6 +8,13 @@
 		"ghcr.io/devcontainers/features/node:1": {},
 		"ghcr.io/devcontainers-contrib/features/firebase-cli:2": {},
 		"ghcr.io/devcontainers/features/java:1": {}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"GitHub.copilot"
+			]
+		}
 	}
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
